@@ -1,241 +1,166 @@
 #include <algorithm>
+#include <assert.h>
 #include <cstring>
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <sstream>
+#include <variant>
+#include <map>
+
+#include "helper.cpp"
+#include "callbacks.cpp"
 
 
 
-
-
-std::vector<const char*> ids = {
-    "ore_copper",
-    "ore_iron",
-    "plate_copper",
-    "plate_iron",
-    "gear",
-    "pack_red"
-};
-struct Item {
-    const char* id;
-    const char* name;
-    int amount;
-};
-struct Ingredient {
-    Item item;
-    bool FINAL;
-};
-struct Recipe {
-    Item item;
-    std::vector<Ingredient> ingredients = {};
-};
-std::vector<Recipe> recipes;
-
-
-struct Command {
-    const char *cmd;
-    int (* callback)(const int argc, const char* args[]);
-    const char* description[2];
-};
-/* Declare callback functions for commands here */
-int print_help(int argc, const char* args[]);
-int test(int argc, const char* args[]);
-int list_recipes(int argc, const char* args[]);
-int calc(int argc, const char* args[]);
-
-std::vector<Command> cmds = {
+Globals globals = {
     {
-       "help",
-        print_help,
-        {"[DESC] Print this help message"}
-    },
-    {
-        "test",
-        test,
-        {"[DESC] test command"}
-    },
-    {
-        "list",
-        list_recipes,
-        {"[DESC] List all recipes"}
-    },
-    {
-        "calc",
-        calc,
-        {"[DESC] Calculate a specific recipe", "[USAGE] calc <item id> <amount>"}
-    }
-};
-/* Define the callback functions here */
-int print_help(const int argc, const char* args[]) {
-    size_t max_cmd_len = 0;
-    for (const Command &cmd : cmds) {
-        max_cmd_len = std::max(max_cmd_len, std::strlen(cmd.cmd));
-    }
-    for (const Command &cmd : cmds) {
-        size_t l = 0;
-        for (const char* line : cmd.description) {
-            if (line != nullptr) {
-                if (l >= 1) {
-                    for (size_t i = 0; i < (max_cmd_len + 3); ++i) {
-                        std::cout << " ";
-                    }
-                } else {
-                    std::cout << cmd.cmd;
-                    for (size_t i = 0; i < max_cmd_len - std::strlen(cmd.cmd); ++i) {
-                        std::cout << " ";
-                    }
-                    std::cout << " - ";
-                }
-                l++;
-                std::cout << line << "\n";
-            }
-        }
-    }
-    return 0;
-}
-int test(const int argc, const char* args[]) {
-    std::cout << "Hello World!\n";
-    return 0;
-}
-int list_recipes(const int argc, const char* args[]) {
-    for (Recipe &recipe : recipes) {
-        std::stringstream s;
-        for (size_t i = 0; i < recipe.ingredients.size(); ++i) {
-            s << recipe.ingredients[i].item.name << " x " << recipe.ingredients[i].item.amount << "   ";
-            if (i < recipe.ingredients.size() - 1) {
-                s << "+   ";
-            }
-        }
-        s << "->   ";
-        s << recipe.item.name << " x " << recipe.item.amount << "\n";
-        std::cout << s.str();
-    }
-    return 0;
-}
-int calc(const int argc, const char* args[]) {
-    switch (argc) {
-        case 2:
-            std::cerr << "[ERROR] Not enough arguments given.\n";
-            return 1;
-        case 3:
-            std::cout << "3\n";
-            return 0;
-        case 4:
-            //TODO: calculating multiple items
-            std::cout << "4\n";
-            return 0;
-        default:
-            //TODO: implement additional arguments
-            std::cerr << "[ERROR] Too many arguments given. " << argc << "\n";
-            return 1;
-    }
-}
-
-//TODO: implement loading recipes from external source
-void load_recipes() {
-    recipes = {
         {
+            "help",
+             print_help,
+             {"[DESC] Print this help message"}
+        },
+        {
+            "test",
+            test,
+            {"[DESC] test command"}
+        },
+        {
+            "list",
+            list_recipes,
+            {"[DESC] List all recipes"}
+        },
+        {
+            "calc",
+            calc,
+            {"[DESC] Calculate a specific recipe", "[USAGE] calc <item id> <amount>"}
+        }
+    },
+{
+        {
+            "ore_copper",
+            {
+                "ore_copper",
+                "Copper ore",
+                0,
+                true
+            }
+        },
+        {
+            "ore_iron",
+            {
+                "ore_iron",
+                "Iron ore",
+                0,
+                true
+            }
+        },
+        {
+            "plate_copper",
             {
                 "plate_copper",
                 "Copper plate",
-                1
-            },
-            {
-                {
-                    {
-                        "ore_copper",
-                        "Copper ore",
-                        2
-                    },
-                    true
-                }
+                0,
+                false
             }
         },
         {
+            "plate_iron",
             {
                 "plate_iron",
                 "Iron plate",
-                1
-            },
-            {
-                {
-                    {
-                        "ore_iron",
-                        "Iron ore",
-                        2
-                    },
-                    true
-                }
+                0,
+                false
             }
         },
         {
+            "gear",
             {
                 "gear",
                 "Iron gear wheel",
-                1
-            },
+                0,
+                false
+            }
+        },
+        {
+            "pack_red",
             {
+                "pack_red",
+                "Automation science pack",
+                0,
+                false
+            }
+        }
+    },
+    {}
+};
+
+
+
+//TODO: implement loading recipes from external source
+void load_recipes() {
+    globals.recipes = {
+        {
+            "plate_copper",
+            {
+                get_item_with_amount("plate_copper", 1, &globals),
                 {
-                    {
-                        "plate_iron",
-                        "Iron plate",
-                        2
-                    },
-                    false
+                    get_item_with_amount("ore_copper", 2, &globals)
                 }
             }
         },
         {
+            "plate_iron",
             {
-                "pack_red",
-                "Automation science pack",
-                1
-            },
-            {
+                get_item_with_amount("plate_iron", 1, &globals),
                 {
-                    {
-                        "gear",
-                        "Iron gear wheel",
-                        1
-                    },
-                    false
-                },
-                {
-                    {
-                        "plate_copper",
-                        "Copper plate",
-                        1
-                    },
-                    false
+                    get_item_with_amount("ore_iron", 2, &globals)
                 }
+            }
+        },
+        {
+            "gear",
+            {
+                get_item_with_amount("gear", 1, &globals),
+                {
+                    get_item_with_amount("plate_iron", 2, &globals)
+                }
+            }
+        },
+        {
+            "pack_red",
+            {
+                get_item_with_amount("pack_red", 1, &globals),
+               {
+                   get_item_with_amount("gear", 1, &globals),
+                   get_item_with_amount("plate_copper", 1, &globals)
+               }
             }
         }
     };
 }
 
-bool has(const std::vector<Command> *vec, const char* element) {
-    for (const Command command: *vec) {
-        if (!std::strcmp(command.cmd, element)) return true;
-    }
-    return false;
-}
-
 int execute_command(const int argc, const char* argv[]) {
     if (argc == 1) {
-        cmds[0].callback(argc, argv);
+        globals.cmds[0].callback(argc, argv, &globals);
         return 1;
     }
-    if (!has(&cmds, argv[1])) {
+    if (!has<Command>(&globals.cmds, argv[1])) {
         std::cout << "Command '" << argv[1] << "' not found\nPossible commands:\n\n";
-        cmds[0].callback(argc, argv);
+        globals.cmds[0].callback(argc, argv, &globals);
         return 1;
     }
 
     load_recipes();
-    for (const Command &cmd : cmds) {
+    for (const Command &cmd : globals.cmds) {
         if (!std::strcmp(cmd.cmd, argv[1])) {
-            return cmd.callback(argc, argv);
+            Cus_Ret ret = cmd.callback(argc, argv, &globals);
+            if (std::holds_alternative<int>(ret)) {
+                return std::get<int>(ret);
+            }
+            if (std::holds_alternative<std::vector<Item>>(ret)) {
+                assert(nullptr == "vector returns for callbacks not implemented yet");
+                //TODO
+            }
         }
     }
     return 1;
