@@ -158,8 +158,8 @@ int execute_command(const int argc, const char* argv[]) {
                 return std::get<int>(ret);
             }
             if (std::holds_alternative<std::vector<Item>>(ret)) {
-                assert(nullptr == "vector returns for callbacks not implemented yet");
-                //TODO
+                print_item_vec(std::get<std::vector<Item>>(ret));
+                return 0;
             }
         }
     }

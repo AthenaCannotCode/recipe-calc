@@ -77,28 +77,20 @@ Cus_Ret calc(const int argc, const char* args[], Globals *globals) { // NOLINT(*
             while (!materials.empty()) {
                 if (!materials.size()) return 1;
                 materials = sort_mats(materials, globals);
-                if (materials[0].final) return 0;
+                if (materials[0].final) return materials;
                 pop_ret<Item> ret = pop_first<Item>(materials);
                 Item first = ret.i;
                 materials = ret.v;
                 std::vector<Item> ingredients = globals->recipes[first.id].ingredients;
-                std::cout << "Ingredients: \n";
-                print_item_vec(ingredients);
-                std::cout << "\n";
                 for (Item ingredient : ingredients) {
-                    std::cerr << "hit outer\n";
-                    std::cerr << ingredient.name << "\n";
                     for (Item &material : materials) {
                         if (ingredient.id == material.id) {
                             material.amount += ingredient.amount;
                             break;
                         }
                     }
-                    std::cerr << "hit\n";
                     materials.push_back(ingredient);
                 }
-                std::cout << "Materials: \n";
-                print_item_vec(materials);
             }
             return 0;
         case 4:
