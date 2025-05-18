@@ -59,6 +59,8 @@ Cus_Ret list_recipes(const int argc, const char* args[], Globals *globals) {
 
 Cus_Ret calc(const int argc, const char* args[], Globals *globals) { // NOLINT(*-non-const-parameter)
     std::vector<Item> materials = {};
+    Cus_Ret ret;
+    long int amount;
     switch (argc) {
         case 2:
             std::cerr << "[ERROR] Not enough arguments given.\n";
@@ -72,6 +74,9 @@ Cus_Ret calc(const int argc, const char* args[], Globals *globals) { // NOLINT(*
             if (is_final(args[2], globals)) {
                 std::cout << "[INFO] Item does not have a recipe.\n";
                 return 0;
+            }
+            if (args[3] == nullptr) {
+                std::cout << "[INFO] Recipe: " << globals->items[args[2]].name << " x 1\n";
             }
             materials.push_back(globals->items[args[2]]);
             while (!materials.empty()) {
@@ -94,9 +99,25 @@ Cus_Ret calc(const int argc, const char* args[], Globals *globals) { // NOLINT(*
             }
             return 0;
         case 4:
-            //TODO: calculating multiple items
-            std::cout << "4\n";
-            return 0;
+            if (!contains(globals->items, args[2])) {
+                std::cerr << "[ERROR] Item id '" << args[2] << "' not found or command not used correctly.\n";
+                return 1;
+            }
+            if (is_final(args[2], globals)) {
+                std::cout << "[INFO] Item '" << globals->items[args[2]].name << "' does not have a recipe.\n";
+                return 0;
+            }
+            amount = std::strtol(args[3], nullptr, 10);
+            std::cout << "[INFO] Recipe: " << globals->items[args[2]].name << " x " << amount << "\n";
+            ret = calc(argc-1, args, globals);
+            if (std::holds_alternative<std::vector<Item>>(ret)) {
+                materials = std::get<std::vector<Item>>(ret);
+                for (Item &item : materials) {
+                    item.amount *= amount;
+                }
+                return materials;
+            }
+            return ret;
 
         default:
             //TODO: implement additional arguments
