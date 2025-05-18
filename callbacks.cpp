@@ -3,12 +3,10 @@
 //
 
 #include <sstream>
-//#include "helper.h"
-#include <complex.h>
-#include <cxxabi.h>
 
 /* Define the callback functions here */
 Cus_Ret print_help(int argc, const char* args[], Globals *globals) {
+    std::cout << "\n[COMMANDS]\n";
     size_t max_cmd_len = 0;
     for (const Command &cmd : globals->cmds) {
         max_cmd_len = std::max(max_cmd_len, std::strlen(cmd.cmd));
