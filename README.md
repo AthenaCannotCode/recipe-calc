@@ -35,6 +35,6 @@ A item takes the form <br>
 &ensp;&ensp;&ensp;&ensp;true (if the item doesn't have a recipe), false (if the item has a recipe)<br>
 &ensp;&ensp;}<br>
 }
-
+<br><br>
 
 Happy crafting!
