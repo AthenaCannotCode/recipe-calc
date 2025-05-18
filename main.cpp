@@ -35,7 +35,15 @@ Globals globals = {
             {"[DESC] Calculate a specific recipe", "[USAGE] calc <item id> <amount>"}
         }
     },
-{
+    {},
+    {}
+};
+
+
+
+//TODO: implement loading item and recipes from external source
+void load_items() {
+    globals.items = {
         {
             "ore_copper",
             {
@@ -90,13 +98,8 @@ Globals globals = {
                 false
             }
         }
-    },
-    {}
-};
-
-
-
-//TODO: implement loading recipes from external source
+    };
+}
 void load_recipes() {
     globals.recipes = {
         {
@@ -150,6 +153,7 @@ int execute_command(const int argc, const char* argv[]) {
         return 1;
     }
 
+    load_items();
     load_recipes();
     for (const Command &cmd : globals.cmds) {
         if (!std::strcmp(cmd.cmd, argv[1])) {
