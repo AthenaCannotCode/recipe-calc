@@ -27,7 +27,7 @@
 file := main.cpp
 exe  := main
 
-G++-ARGS = -std=c++20 -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
+G++-ARGS = -std=c++23 -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 
 build:
 	@echo ""

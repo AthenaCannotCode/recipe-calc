@@ -121,7 +121,52 @@ void load_items() {
                 0,
                 false
             }
-        }
+        },
+        {
+            "module_speed_3",
+            {
+                "module_speed_3",
+                "Speed module 3",
+                0,
+                false
+            }
+        },
+        {
+            "module_speed_2",
+            {
+                "module_speed_2",
+                "Speed module 2",
+                0,
+                false
+            }
+        },
+        {
+            "module_speed_1",
+            {
+                "module_speed_1",
+                "Speed module 1",
+                0,
+                true
+            }
+        },
+        {
+            "circuit_blue",
+            {
+                "circuit_blue",
+                "Processing Unit",
+                0,
+                true
+            }
+        },
+        {
+            "circuit_red",
+            {
+                "circuit_red",
+                "Advanced Circuit",
+                0,
+                true
+            }
+        },
     };
 }
 void load_recipes() {
@@ -157,10 +202,33 @@ void load_recipes() {
             "pack_red",
             {
                 get_item_with_amount("pack_red", 1, &globals),
-               {
+                {
                    get_item_with_amount("gear", 1, &globals),
                    get_item_with_amount("plate_copper", 1, &globals)
-               }
+                }
+            }
+        },
+        {
+            "module_speed_3",
+            {
+                get_item_with_amount("module_speed_3", 1, &globals),
+                {
+                    get_item_with_amount("module_speed_2", 4, &globals),
+                    get_item_with_amount("circuit_blue", 5, &globals),
+                    get_item_with_amount("circuit_red", 5, &globals)
+                }
+
+            }
+        },
+        {
+            "module_speed_2",
+            {
+                get_item_with_amount("module_speed_2", 1, &globals),
+                    {
+                        get_item_with_amount("module_speed_1", 4, &globals),
+                       get_item_with_amount("circuit_blue", 5, &globals),
+                       get_item_with_amount("circuit_red", 5, &globals)
+                    }
             }
         }
     };
@@ -186,6 +254,8 @@ int execute_command(const int argc, const char* argv[]) {
                 return std::get<int>(ret);
             }
             if (std::holds_alternative<std::vector<Item>>(ret)) {
+                std::cout << "\n";
+                std::cout << "[INFO] Total resources needed for recipe:\n";
                 print_item_vec(std::get<std::vector<Item>>(ret));
                 return 0;
             }

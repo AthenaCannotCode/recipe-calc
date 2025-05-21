@@ -29,6 +29,7 @@
 //
 
 #include <sstream>
+//#include "helper.h"
 
 /* Define the callback functions here */
 Cus_Ret print_help(int argc, const char* args[], Globals *globals) {
@@ -81,7 +82,7 @@ Cus_Ret list_recipes(const int argc, const char* args[], Globals *globals) {
     return 0;
 }
 
-Cus_Ret calc(const int argc, const char* args[], Globals *globals) { // NOLINT(*-non-const-parameter)
+Cus_Ret calc(const int argc, const char* args[], Globals *globals) {
     std::vector<Item> materials = {};
     Cus_Ret ret;
     long int amount;
@@ -100,25 +101,31 @@ Cus_Ret calc(const int argc, const char* args[], Globals *globals) { // NOLINT(*
                 return 0;
             }
             if (args[3] == nullptr) {
-                std::cout << "[INFO] Recipe: " << globals->items[args[2]].name << " x 1\n";
+                std::cout << "[INFO] Recipe: " << globals->items[args[2]].name << " x 1\n\n\n";
             }
-            materials.push_back(globals->items[args[2]]);
+            materials.push_back(get_item_with_amount(args[2], 1, globals));
+            std::cout << "[INFO] Adding new ingredient '" << materials[0].name << "' to material list.\n";
             while (!materials.empty()) {
-                if (!materials.size()) return 1;
-                materials = sort_mats(materials, globals);
+                materials = sort_mats(materials);
                 if (materials[0].final) return materials;
-                pop_ret<Item> ret = pop_first<Item>(materials);
-                Item first = ret.i;
-                materials = ret.v;
-                std::vector<Item> ingredients = globals->recipes[first.id].ingredients;
+                pop_ret pop = pop_first(materials);
+                materials.clear();
+                materials = pop.v;
+                Item to_craft = pop.i;
+                std::cout << "\n[INFO] Calculating '" << to_craft.name << "'...\n";
+                std::vector<Item> ingredients = globals->recipes[to_craft.id].ingredients;
                 for (Item ingredient : ingredients) {
                     for (Item &material : materials) {
                         if (ingredient.id == material.id) {
-                            material.amount += ingredient.amount;
-                            break;
+                            std::cout << "[INFO] Increasing amount of '" << material.name << "' by " << ingredient.amount * to_craft.amount << ".\n";
+                            material.amount += ingredient.amount * to_craft.amount;
+                            goto end;
                         }
                     }
+                    std::cout << "[INFO] Adding new ingredient '" << ingredient.name << "' x " << ingredient.amount * to_craft.amount << " to material list.\n";
+                    ingredient.amount = ingredient.amount * to_craft.amount;
                     materials.push_back(ingredient);
+                    end:
                 }
             }
             return 0;

@@ -65,7 +65,7 @@ template <typename T> std::vector<T> insert(std::vector<T> vec, size_t idx, size
     return vec;
 }
 
-std::vector<Item> sort_mats(std::vector<Item> mats, Globals *globals) {
+std::vector<Item> sort_mats(std::vector<Item> mats) {
     for (size_t i = 0; i < mats.size(); ++i) {
         for (size_t j = i; j < mats.size() - 1; ++j) {
             if (mats[j] > mats[j + 1]) {
